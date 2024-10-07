@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{master :: layout(~{::title},~{::main})}">
+<head>
+    <title>Home page</title>
+</head>
+
+<body>
+<main>
+    <div class="d-flex justify-content-between px-2 mb-5 container-fluid">
+        <div class="ms-2">
+            <a sec:authorize="isAuthenticated()" class="btn btn-outline-primary fs-4"
+               th:href="@{'/ticket/new'}" role="button">
+                Create Ticket
+                <img th:src ="@{/images/ticket-perforated.svg}" width="30" height="30" alt="ticket icon"
+                     class="ms-2 mb-1">
+            </a>
+        </div>
+        <div class="col-md-4 d-flex align-items-start">
+            <input id="searchInput" class="form-control border border-primary "
+                   placeholder="Search ticket">
+            <a id="cancelSearchButton" class="btn btn-outline-primary" th:href="@{/home}" role="button">
+                Cancel
+            </a>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div id="ticketsList" class="row row-cols-4">
+            <div class="col border border-2 rounded-2 px-2 py-2 m-3" th:each="ticket : ${allTickets}">
+                <span class="fw-bold fs-4 text-black" th:text="${ticket.title}"></span>
+
+                <br>
+
+                <span class="fw-semibold px-1 rounded-3 text-white bg-primary"
+                      th:text="${#strings.toLowerCase(ticket.status.value)}">
+                </span>
+                <span class="fw-semibold text-secondary ms-1"
+                    th:text="${ticket.type.value}">
+                </span>
+
+                <br>
+
+                <img th:src ="@{/images/person.svg}" alt="author icon" title="author">
+                <span class="text-secondary" th:text="${ticket.author.username}" title="author"></span>
+                <img class="ms-3 mb-1" th:src ="@{/images/calendar4.svg}" alt="calendar icon">
+                <span class="text-secondary"
+                      th:text="${#temporals.format(ticket.creationDate, 'HH:mm dd-MM-yyyy')}">
+                </span>
+
+                <br>
+
+                <div class="border-top my-3"></div>
+                <p class="fs-6"
+                   th:text="${ticket.description}">
+                </p>
+                <div class="border-top my-3"></div>
+                <div>
+                    <a class="btn btn-outline-primary px-1 py-0 fw-semibold"
+                       th:href="@{${'/ticket/' + ticket.id}}" role="button">
+                        <img class="mb-1" th:src ="@{/images/eye.svg}" alt="view icon">
+                        View
+                    </a>
+                    <a sec:authorize="hasRole('ADMIN')" class="btn btn-outline-primary px-1 py-0 fw-semibold"
+                       th:href="@{${'/ticket/' + ticket.id + '/edit'}}" role="button">
+                        <img class="mb-1" th:src ="@{/images/gear.svg}" alt="edit icon">
+                        Edit
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cancelSearchButton = document.getElementById("cancelSearchButton");
+        cancelSearchButton.style.display = "none";
+
+        let searchInput = document.getElementById("searchInput");
+
+        searchInput.addEventListener("input", function () {
+            let val = searchInput.value;
+
+            if(/^\s*$/.test(val) || val.length < 3) {
+                return;
+            }
+
+            cancelSearchButton.style.display = "inline-block"
+
+            let request = new Request('/ticket/search?q=' + val);
+
+            fetch(request)
+                .then(response => {
+                    return response.json();
+                })
+                .then(data => {
+                    removeTickets();
+                    displayTickets(data);
+                })
+                .catch(error => {
+                    console.error('Error during fetch operation: ', error);
+                })
+        });
+
+        function removeTickets() {
+            let container = document.getElementById("ticketsList");
+            let tickets = container.getElementsByClassName('col');
+            let ticketsArray = Array.from(tickets);
+
+            ticketsArray.forEach(function (ticket) {
+                ticket.remove();
+            })
+        }
+
+        function displayTickets(data) {
+            data.forEach(ticket => {
+                let container = document.getElementById("ticketsList");
+                let div = document.createElement("div");
+
+                let date = new Date(ticket.creationDate);
+                let formattedDate = date.toLocaleString('it-CH', {
+                    hour12: false,
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                })
+
+                let parts = formattedDate.replaceAll(" ", "").replaceAll(".", "-").split(",");
+                formattedDate = `${parts[1]} ${parts[0]}`
+
+                div.className = "col border border-2 rounded-2 px-2 py-2 m-3";
+                div.innerHTML =
+                    `
+                        <span class="fw-bold fs-4 text-black">${ticket.title}</span>
+                        <br>
+                        <span class="fw-semibold px-1 rounded-3 text-white bg-primary">
+                            ${ticket.status.value.toLowerCase()}
+                        </span>
+                        <span class="fw-semibold text-secondary ms-1">
+                            ${ticket.type.value}
+                        </span>
+                        <br>
+                        <img src ="/images/person.svg" alt="author icon" title="author">
+                        <span class="text-secondary" title="author">
+                            ${ticket.author.username}
+                        </span>
+                        <img class="ms-3 mb-1" src ="/images/calendar4.svg" alt="calendar icon">
+                        <span class="text-secondary">
+                            ${formattedDate}
+                        </span>
+                        <div class="border-top my-3"></div>
+                        <span class="fs-6">
+                            ${ticket.description}
+                        </span>
+                        <div class="border-top my-3"></div>
+                        <div>
+                            <a class="btn btn-outline-primary px-1 py-0 fw-semibold"
+                                href=ticket/${ticket.id}" role="button">
+                                <img class="mb-1" src ="/images/eye.svg" alt="eye icon">
+                                View
+                            </a>
+                            <a class="btn btn-outline-primary px-1 py-0 fw-semibold"
+                               href="ticket/${ticket.id}/edit" role="button">
+                                <img class="mb-1" src ="/images/gear.svg" alt="gear icon">
+                                Edit
+                            </a>
+                        </div>
+                    `
+
+                container.appendChild(div);
+            })
+        }
+    </script>
+</main>
+</body>
+</html>

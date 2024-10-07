@@ -1,0 +1,101 @@
+* {
+    font-family: "Amasis MT Pro Medium", serif;
+}
+
+.nav-item {
+    font-size: 18px;
+}
+
+#navigationMenu {
+    height: 50px;
+    line-height: 46px;
+}
+
+#loginButton {
+    width: 82px;
+}
+
+#registerButton {
+    width: 82px;
+}
+
+#openTicketsContainer {
+    width: 280px;
+}
+
+#inProgressTicketsContainer {
+    width: 280px;
+}
+
+#doneTicketsContainer {
+    width: 280px;
+}
+
+#closedTicketsContainer {
+    width: 280px;
+}
+
+#summaryContainer {
+    width: 230px;
+}
+
+#descriptionTextArea {
+    height: 120px;
+    resize: none;
+}
+
+.login-container label {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.login-container input {
+    font-size: 20px;
+}
+
+.registration-container label {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.registration-container input {
+    font-size: 20px;
+}
+
+body{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    margin-bottom : 100px;
+}
+
+footer{
+    margin-top: auto;
+}
+
+.valid-input {
+    border-color: green;
+}
+
+.invalid-input {
+    border-color: red;
+}
+
+.errorMessage {
+    color: red;
+}
+
+.view-ticket-details-link {
+    cursor: pointer;
+}
+
+.comment-container p {
+    padding-left: 5px;
+}
+
+.comment-container a {
+    padding-left: 5px;
+}

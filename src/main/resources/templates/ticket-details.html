@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{master :: layout(~{::title},~{::main})}">
+<head>
+    <title th:text="${'Ticket ' + ticket.id + ' details'}">Title</title>
+</head>
+
+<body>
+    <main>
+        <div class="container-fluid mx-2" th:object="${ticket}">
+            <span th:text="*{title}" class="fs-1 fw-bold text-black"></span>
+
+            <div id="buttonsContainer" class="my-3">
+                <a sec:authorize="hasRole('ADMIN')"
+                   class="btn btn-outline-primary px-1 py-0 fw-semibold fs-5"
+                   th:href="@{${'/ticket/' + ticket.id + '/edit'}}" role="button">
+                    <img class="mb-1" th:src ="@{/images/gear.svg}" alt="edit icon">
+                    Edit
+                </a>
+                <a sec:authorize="hasRole('ADMIN')"
+                   class="btn btn-outline-primary px-1 py-0 fw-semibold fs-5 ms-3"
+                   th:href="@{${'/ticket/' + ticket.id + '/delete'}}" role="button">
+                    <img class="mb-1" th:src ="@{/images/trash.svg}" alt="delete icon">
+                    Delete
+                </a>
+                <button th:if="${watched != null && !watched}" sec:authorize="isAuthenticated()" id="watchButton"
+                        th:attr="ticketId=*{id}"
+                        class="btn btn-outline-primary px-1 py-0 fw-semibold fs-5 ms-3">
+                    <img class="mb-1" th:src ="@{/images/eyeglasses.svg}"
+                         width="20" height="20" alt="watch icon">
+                    Watch
+                </button>
+                <span id="watchedButtonContainer">
+                    <button th:if="${watched != null && watched}"
+                            class="btn btn-outline-primary px-1 py-0 fw-semibold fs-5 ms-3" disabled>
+                        <img class="mb-1" th:src ="@{/images/eyeglasses.svg}"
+                             width="20" height="20" alt="watch icon">
+                        Watched
+                    </button>
+                </span>
+            </div>
+
+            <div class="mt-2">
+                <span class="fs-3 text-secondary fw-semibold">Details</span>
+                <div class="border-top border-2 my-1"></div>
+
+                <div class="col-6">
+                    <div class="row">
+                        <div class="col">
+                            <span class="fs-5 text-black fw-semibold">Status:</span>
+                            <span class="fs-5 fw-semibold px-1 rounded-3 text-white bg-primary"
+                                  th:text="*{#strings.toLowerCase(status.value)}">
+                            </span>
+                        </div>
+                        <div class="col">
+                            <span class="fs-5 text-black fw-semibold">Type:</span>
+                            <span class="fs-5 fw-semibold text-secondary ms-1"
+                                  th:text="*{type.value}">
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <span class="fs-5 text-black fw-semibold">Author:</span>
+                            <span class="fs-5 text-secondary" th:text="*{author.username}"></span>
+                        </div>
+                        <div class="col">
+                            <span class="fs-5 text-black fw-semibold">Created:</span>
+                            <span class="fs-5" th:text="*{#temporals.format(creationDate, 'dd-MM-yyyy, HH:mm')}"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <span class="fs-5 text-black fw-semibold">Assignee:</span>
+                            <span class="fs-5 text-secondary" th:text="*{assignee.username}"></span>
+                        </div>
+                        <div class="col">
+                            <span class="fs-5 text-black fw-semibold">Due to:</span>
+                            <span class="fs-5" th:text="*{#temporals.format(dueDate, 'dd-MM-yyyy')}"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <span class="fs-5 text-black fw-semibold">Estimated hours:</span>
+                            <span class="fs-5 text-secondary" th:text="*{resolutionEstimatedHours}"></span>
+                        </div>
+                        <div class="col">
+                            <span class="fs-5 text-black fw-semibold">Total hours:</span>
+                            <span class="fs-5 text-secondary"
+                                  th:text="${ticket.resolutionTotalHours != null ?
+                                  ticket.resolutionTotalHours : 'ongoing'}">
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-2">
+                <span class="fs-3 text-secondary fw-semibold mt-3">Description</span>
+                <div class="border-top border-2 my-1"></div>
+                <span class="fs-5" th:text="*{description}"></span>
+            </div>
+
+            <div class="mt-2">
+                <span class="fs-3 text-secondary fw-semibold mt-3">Attachment</span>
+                <div class="border-top border-2 my-1"></div>
+
+                <a th:if="*{attachment != null}" id="attachment" target="_blank" class="fs-5"
+                   th:text="*{attachment.name}"
+                   th:href="@{'/ticket/' + *{id} + '/attachment/' + *{attachment.name}}"></a>
+
+                <span th:if="*{attachment == null}" class="fs-5">No attachment</span>
+            </div>
+
+            <div class="mt-2">
+                <span class="fs-3 text-secondary fw-semibold mt-3">Comments</span>
+                <div class="border-top border-2 my-1"></div>
+
+                <button sec:authorize="isAuthenticated()" id="addCommentButton"
+                        th:attr="ticketId=${ticket.id}" class="btn btn-primary px-1 py-0 fw-semibold fs-5">
+                    Add Comment
+                </button>
+
+                <div id="addCommentContainer" class="my-2">
+
+                </div>
+
+                <div id="commentsContainer">
+                    <div class="col-4 border border-2 p-2 my-3" th:each="comment : *{comments}">
+                        <span class="text-primary" th:text="${comment.user.username}"></span>
+                        <span>|</span>
+                        <span th:text="${#temporals.format(comment.creationDate, 'HH:mm dd-MM-yyyy')}"></span>
+
+                        <br>
+
+                        <span th:text="${comment.text}"></span>
+
+                        <div class="border-top my-2"></div>
+
+                        <!--<button sec:authorize="isAuthenticated()"
+                                class="reply-button btn btn-primary px-1 py-0 fw-semibold">
+                            Reply
+                        </button>
+                        <div class="replyButtonContainer">
+
+                        </div>-->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <script>
+            //handle watch button
+            let watchButton = document.getElementById("watchButton");
+
+            if(watchButton != null) {
+                watchButton.addEventListener("click", function () {
+                    let ticketId = watchButton.getAttribute("ticketId");
+
+                    let request = new Request(`/ticket/${ticketId}/watch`, {
+                        method: 'POST'
+                    });
+                    fetch(request)
+                        .then(response => {
+                            if (response.ok) {
+                                let buttonsContainer = document.getElementById("buttonsContainer");
+                                let watchButton = document.getElementById("watchButton");
+
+                                buttonsContainer.removeChild(watchButton);
+
+                                let watchedButtonContainer = document.getElementById("watchedButtonContainer");
+                                watchedButtonContainer.innerHTML =
+                                    `
+                                <button class="btn btn-outline-primary px-1 py-0 fw-semibold fs-5 ms-3"
+                                    disabled>
+                                    <img class="mb-1" src ="/images/eyeglasses.svg"
+                                        width="20" height="20" alt="watch icon">
+                                    Watched
+                                </button>
+                                `
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error during fetch operation: ', error);
+                        })
+                })
+            }
+
+            //handle reply button
+            let replyButtons = document.getElementsByClassName("reply-button");
+            for(let i = 0; i < replyButtons.length; i++) {
+                let replyButton = replyButtons[i];
+
+                replyButton.addEventListener("click", function() {
+                    replyButton.display.style = "none";
+
+                    let replyButtonContainer = replyButton.nextElementSibling;
+                    replyButtonContainer.innerText = "HELLO";
+                })
+            }
+
+
+            //display comment replies
+
+
+
+            //handle add comment button
+            let addCommentButton = document.getElementById("addCommentButton");
+            let ticketId = addCommentButton.getAttribute("ticketId");
+
+            addCommentButton.addEventListener("click", function () {
+                addCommentButton.style.display = "none"
+                let addCommentContainer = document.getElementById("addCommentContainer");
+
+                addCommentContainer.innerHTML =
+                    `
+                        <label for="addCommentTextArea" class="visually-hidden">Comment</label>
+                        <textarea id="addCommentTextArea" class="form-control"></textarea>
+                    `
+
+                //submit comment button
+                let submitCommentButton = document.createElement("button");
+                submitCommentButton.id = "submitCommentButton";
+                submitCommentButton.className = "btn btn-primary px-1 py-0 fw-semibold fs-5 my-1";
+                submitCommentButton.innerText = "Submit";
+                submitCommentButton.addEventListener("click", function () {
+                    let commentText = document.getElementById("addCommentTextArea").value;
+
+                    let addCommentRequest = new Request(`/ticket/${ticketId}/new-comment`, {
+                        method: 'post',
+                        headers: {
+                            'Content-Type' : 'application/json'
+                        },
+                        body: JSON.stringify({ text: commentText })
+                    })
+
+                    fetch(addCommentRequest)
+                        .then(response => {
+                            if(response.ok) {
+                                addCommentButton.style.display = "inline-block";
+                                addCommentContainer.innerHTML = "";
+
+                                let getAllCommentsRequest = new Request(`/ticket/${ticketId}/comments`);
+
+                                fetch(getAllCommentsRequest)
+                                    .then(response => {
+                                        if(response.ok) {
+                                            return response.json();
+                                        }
+                                    })
+                                    .then(tickets => {
+                                        let commentsContainer = document.getElementById("commentsContainer");
+                                        commentsContainer.innerHTML = "";
+
+                                        tickets.forEach(comment => {
+                                            let commentContainer = document.createElement("div");
+                                            commentContainer.className = "col-4 border border-2 p-2 my-3";
+
+                                            let date = new Date(comment.creationDate);
+                                            let formattedDate = date.toLocaleString('it-CH', {
+                                                hour12: false,
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric'
+                                            })
+
+                                            let parts = formattedDate.replaceAll(" ", "").replaceAll(".", "-").split(",");
+                                            formattedDate = `${parts[1]} ${parts[0]}`
+
+                                            commentContainer.innerHTML =
+                                                `
+                                                <span class="text-primary">${comment.user.username}</span>
+                                                <span>|</span>
+                                                <span>${formattedDate}</span>
+                                                <br>
+                                                <span>${comment.text}</span>
+                                                <div class="border-top my-2"></div>
+                                                `
+
+                                            /*let replyButton = document.createElement("button");
+                                            replyButton.className = "reply-button btn btn-primary px-1 py-0 fw-semibold";
+                                            replyButton.innerText = "Reply";
+
+                                            commentContainer.appendChild(replyButton);*/
+                                            commentsContainer.appendChild(commentContainer);
+                                        })
+                                    })
+                                    .catch(error => {
+                                        console.error('Error during fetch operation: ', error);
+                                    })
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error during fetch operation: ', error);
+                        })
+                });
+
+                //cancel add comment button
+                let cancelAddCommentButton = document.createElement("button");
+                cancelAddCommentButton.id = "cancelAddCommentButton";
+                cancelAddCommentButton.className = "btn btn-primary px-1 py-0 fw-semibold fs-5 my-1 ms-2";
+                cancelAddCommentButton.innerText = "Cancel";
+
+                cancelAddCommentButton.addEventListener("click", function () {
+                    addCommentButton.style.display = "inline-block";
+                    addCommentContainer.innerHTML = "";
+                })
+
+                addCommentContainer.appendChild(submitCommentButton);
+                addCommentContainer.appendChild(cancelAddCommentButton);
+            })
+
+
+            function replyButtonOnClick() {
+
+            }
+        </script>
+    </main>
+</body>
+</html>

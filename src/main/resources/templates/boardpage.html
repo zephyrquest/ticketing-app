@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{master :: layout(~{::title},~{::main})}">
+<head>
+    <title>Board page</title>
+</head>
+
+<body>
+<main>
+    <div class="d-flex justify-content-between px-2 mb-5">
+        <div class="ms-2">
+            <a sec:authorize="isAuthenticated()" class="btn btn-outline-primary fs-4"
+               th:href="@{'/ticket/new'}" role="button">
+                Create Ticket
+                <img th:src ="@{/images/ticket-perforated.svg}" width="30" height="30" alt="ticket icon"
+                     class="ms-2 mb-1">
+            </a>
+        </div>
+        <div class="col-md-4 d-flex align-items-start">
+            <input id="searchInput" class="form-control border border-primary "
+                   placeholder="Search ticket">
+            <a id="cancelSearchButton" class="btn btn-outline-primary" th:href="@{/board}" role="button">
+                Cancel
+            </a>
+        </div>
+    </div>
+
+    <div class="container-fluid mx-3">
+        <div class="row row-cols-5 justify-content-around align-items-start">
+            <div id="openTicketsContainer" class="col border border-2 border-dark-subtle rounded-2 px-0">
+                <div class="text-center bg-dark-subtle rounded-1">
+                    <span class="fs-3 px-2">Open tickets</span>
+                </div>
+
+                <div class="ticket border border-2 rounded-2 px-2 py-2 mx-3 my-3" th:each="ticket : ${openTickets}">
+                    <span class="fw-bold fs-4 text-black" th:text="${ticket.title}"></span>
+
+                    <br>
+
+                    <span class="fw-semibold text-secondary ms-1"
+                              th:text="${ticket.type.value}">
+                    </span>
+
+                    <br>
+
+                    <img th:src ="@{/images/person-badge.svg}" alt="assignee icon" title="assignee">
+                    <span class="text-secondary" th:text="${ticket.assignee.username}" title="assignee"></span>
+
+                    <div class="border-top my-3"></div>
+
+                    <div>
+                        <button class="btn btn-outline-primary px-1 py-0 fw-semibold details-button"
+                                th:attr="ticketId=${ticket.id}">
+                            <img class="mb-1" th:src ="@{/images/layout-text-sidebar-reverse.svg}" alt="details icon">
+                            Details
+                        </button>
+                    </div>
+                    <div class="mt-1 total-hours-container">
+                        <button th:if="${#authentication.name == ticket.assignee.username
+                                    && ticket.resolutionTotalHours == null}"
+                                class="btn btn-outline-primary px-1 py-0 fw-semibold total-hours-button"
+                                th:attr="ticketId=${ticket.id}">
+                            <img class="mb-1" th:src ="@{/images/hourglass-bottom.svg}" alt="time spent icon">
+                            Set time spent
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="inProgressTicketsContainer" class="col border border-2 border-dark-subtle rounded-2 px-0">
+                <div class="text-center bg-dark-subtle rounded-1">
+                    <span class="fs-3 px-2">In progress tickets</span>
+                </div>
+
+                <div class="ticket border border-2 rounded-2 px-2 py-2 mx-3 my-3" th:each="ticket : ${inProgressTickets}">
+                    <span class="fw-bold fs-4 text-black" th:text="${ticket.title}"></span>
+
+                    <br>
+
+                    <span class="fw-semibold text-secondary ms-1"
+                          th:text="${ticket.type.value}">
+                    </span>
+
+                    <br>
+
+                    <img th:src ="@{/images/person-badge.svg}" alt="assignee icon" title="assignee">
+                    <span class="text-secondary" th:text="${ticket.assignee.username}" title="assignee"></span>
+
+                    <div class="border-top my-3"></div>
+
+                    <div>
+                        <a class="btn btn-outline-primary px-1 py-0 fw-semibold"
+                           th:href="@{${'/ticket/' + ticket.id}}" role="button">
+                            <img class="mb-1" th:src ="@{/images/layout-text-sidebar-reverse.svg}" alt="details icon">
+                            Details
+                        </a>
+                    </div>
+                    <div class="mt-1 total-hours-container">
+                        <button th:if="${#authentication.name == ticket.assignee.username
+                                    && ticket.resolutionTotalHours == null}"
+                                class="btn btn-outline-primary px-1 py-0 fw-semibold total-hours-button"
+                                th:attr="ticketId=${ticket.id}">
+                            <img class="mb-1" th:src ="@{/images/hourglass-bottom.svg}" alt="time spent icon">
+                            Set time spent
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="doneTicketsContainer" class="col border border-2 border-dark-subtle rounded-2 px-0">
+                <div class="text-center bg-dark-subtle rounded-1">
+                    <span class="fs-3 px-2">Done tickets</span>
+                </div>
+
+                <div class="ticket border border-2 rounded-2 px-2 py-2 mx-3 my-3" th:each="ticket : ${doneTickets}">
+                    <span class="fw-bold fs-4 text-black" th:text="${ticket.title}"></span>
+
+                    <br>
+
+                    <span class="fw-semibold text-secondary ms-1"
+                          th:text="${ticket.type.value}">
+                    </span>
+
+                    <br>
+
+                    <img th:src ="@{/images/person-badge.svg}" alt="assignee icon" title="assignee">
+                    <span class="text-secondary" th:text="${ticket.assignee.username}" title="assignee"></span>
+
+                    <div class="border-top my-3"></div>
+
+                    <div>
+                        <a class="btn btn-outline-primary px-1 py-0 fw-semibold"
+                           th:href="@{${'/ticket/' + ticket.id}}" role="button">
+                            <img class="mb-1" th:src ="@{/images/layout-text-sidebar-reverse.svg}" alt="details icon">
+                            Details
+                        </a>
+                    </div>
+                    <div class="mt-1 total-hours-container">
+                        <button th:if="${#authentication.name == ticket.assignee.username
+                                    && ticket.resolutionTotalHours == null}"
+                                class="btn btn-outline-primary px-1 py-0 fw-semibold total-hours-button"
+                                th:attr="ticketId=${ticket.id}">
+                            <img class="mb-1" th:src ="@{/images/hourglass-bottom.svg}" alt="time spent icon">
+                            Set time spent
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="closedTicketsContainer" class="col border border-2 border-dark-subtle rounded-2 px-0">
+                <div class="text-center bg-dark-subtle rounded-1">
+                    <span class="fs-3 px-2">Closed tickets</span>
+                </div>
+
+                <div class="ticket border border-2 rounded-2 px-2 py-2 mx-3 my-3" th:each="ticket : ${closedTickets}">
+                    <span class="fw-bold fs-4 text-black" th:text="${ticket.title}"></span>
+
+                    <br>
+
+                    <span class="fw-semibold text-secondary ms-1"
+                          th:text="${ticket.type.value}">
+                    </span>
+
+                    <br>
+
+                    <img th:src ="@{/images/person-badge.svg}" alt="assignee icon" title="assignee">
+                    <span class="text-secondary" th:text="${ticket.assignee.username}" title="assignee"></span>
+
+                    <div class="border-top my-3"></div>
+
+                    <div>
+                        <a class="btn btn-outline-primary px-1 py-0 fw-semibold"
+                           th:href="@{${'/ticket/' + ticket.id}}" role="button">
+                            <img class="mb-1" th:src ="@{/images/layout-text-sidebar-reverse.svg}" alt="details icon">
+                            Details
+                        </a>
+                    </div>
+                    <div class="mt-1 total-hours-container">
+                        <button th:if="${#authentication.name == ticket.assignee.username
+                                    && ticket.resolutionTotalHours == null}"
+                                class="btn btn-outline-primary px-1 py-0 fw-semibold total-hours-button"
+                                th:attr="ticketId=${ticket.id}">
+                            <img class="mb-1" th:src ="@{/images/hourglass-bottom.svg}" alt="time spent icon">
+                            Set time spent
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="summaryContainer" class="col border border-2 border-dark-subtle rounded-2 px-0">
+                <div class="text-center bg-dark-subtle rounded-1">
+                    <span class="fs-3 px-2">Summary</span>
+                </div>
+
+                <div id="counterContainer" class="mx-2 my-2">
+                    <div>
+                        <span>OPEN:</span>
+                        <span th:text="${openTickets.size()}"></span>
+
+                        <div class="border-top my-2"></div>
+
+                        <span>IN PROGRESS:</span>
+                        <span th:text="${inProgressTickets.size()}"></span>
+
+                        <div class="border-top my-2"></div>
+
+                        <span>DONE:</span>
+                        <span th:text="${doneTickets.size()}"></span>
+
+                        <div class="border-top my-2"></div>
+
+                        <span>CLOSED:</span>
+                        <span th:text="${closedTickets.size()}"></span>
+                    </div>
+                </div>
+
+                <div class="border-top my-3 border-2"></div>
+
+                <div id="percentagesContainer" class="mx-2 my-2">
+                    <div th:each="ticket : ${openTickets}">
+                        <div>
+                            <span class="fw-semibold text-black" th:text="${ticket.title}"></span>
+                        </div>
+                        <div class="row justify-content-center align-items-center mx-2">
+                            <progress class="col-6" th:value="${ticket.resolutionTotalHours != null ?
+                                ticket.resolutionTotalHours / ticket.resolutionEstimatedHours * 100 : 0}"
+                                      max="100">
+                            </progress>
+
+                            <span class="col-3" th:text="${ticket.resolutionTotalHours != null ?
+                                ticket.resolutionTotalHours / ticket.resolutionEstimatedHours * 100 : 0} + '%'">
+                            </span>
+                        </div>
+                    </div>
+
+                    <div th:each="ticket : ${inProgressTickets}">
+                        <div>
+                            <span class="fw-semibold text-black" th:text="${ticket.title}"></span>
+                        </div>
+                        <div class="row justify-content-center align-items-center mx-2">
+                            <progress class="col-6" th:value="${ticket.resolutionTotalHours != null ?
+                                ticket.resolutionTotalHours / ticket.resolutionEstimatedHours * 100 : 0}"
+                                      max="100">
+                            </progress>
+
+                            <span class="col-3" th:text="${ticket.resolutionTotalHours != null ?
+                                ticket.resolutionTotalHours / ticket.resolutionEstimatedHours * 100 : 0} + '%'">
+                            </span>
+                        </div>
+                    </div>
+
+                    <div th:each="ticket : ${doneTickets}">
+                        <div>
+                            <span class="fw-semibold text-black" th:text="${ticket.title}"></span>
+                        </div>
+                        <div class="row justify-content-center align-items-center mx-2">
+                            <progress class="col-6" th:value="${ticket.resolutionTotalHours != null ?
+                                ticket.resolutionTotalHours / ticket.resolutionEstimatedHours * 100 : 0}"
+                                      max="100">
+                            </progress>
+
+                            <span class="col-3" th:text="${ticket.resolutionTotalHours != null ?
+                                ticket.resolutionTotalHours / ticket.resolutionEstimatedHours * 100 : 0} + '%'">
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="detailsContainer">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        //handle the search input
+        let cancelSearchButton = document.getElementById("cancelSearchButton");
+        cancelSearchButton.style.display = "none";
+
+        let searchInput = document.getElementById("searchInput");
+
+        searchInput.addEventListener("input", function () {
+            let val = searchInput.value;
+
+            if(/^\s*$/.test(val) || val.length < 3) {
+                return;
+            }
+
+            cancelSearchButton.style.display = "inline-block"
+
+            let request = new Request('/ticket/search?q=' + val);
+
+            fetch(request)
+                .then(response => {
+                    return response.json();
+                })
+                .then(data => {
+                    removeAllTickets();
+                    displayTickets(data);
+                })
+                .catch(error => {
+                    console.error('Error during fetch operation: ', error);
+                })
+        });
+
+        function removeAllTickets() {
+            removeTickets("openTicketsContainer");
+            removeTickets("inProgressTicketsContainer");
+            removeTickets("doneTicketsContainer");
+            removeTickets("closedTicketsContainer");
+        }
+
+        function removeTickets(ticketsContainer) {
+            let container = document.getElementById(ticketsContainer);
+            let tickets = container.getElementsByClassName("ticket");
+            let ticketsArray = Array.from(tickets);
+
+            ticketsArray.forEach(function (ticket) {
+                ticket.remove();
+            })
+        }
+
+        function displayTickets(data) {
+            data.forEach(ticket => {
+                let div = document.createElement("div");
+
+                div.className = "ticket border border-2 rounded-2 px-2 py-2 m-3";
+                div.innerHTML =
+                    `
+                        <span class="fw-bold fs-4 text-black">${ticket.title}</span>
+
+                        <br>
+
+                        <span class="fw-semibold text-secondary ms-1">
+                            ${ticket.type.value}
+                        </span>
+
+                        <br>
+
+                        <img src ="/images/person-badge.svg" alt="assignee icon" title="assignee">
+                        <span class="text-secondary" title="assignee">
+                            ${ticket.assignee.username}
+                        </span>
+
+                        <div class="border-top my-3"></div>
+
+                        <div>
+                            <a class="btn btn-outline-primary px-1 py-0 fw-semibold"
+                                href=ticket/${ticket.id}" role="button">
+                                <img class="mb-1" src ="/images/eye.svg" alt="eye icon">
+                                View
+                            </a>
+                        </div>
+                    `
+
+                switch (ticket.status.value) {
+                    case "OPEN":
+                        let openTicketsContainer = document.getElementById("openTicketsContainer");
+                        openTicketsContainer.appendChild(div);
+                        break;
+                    case "IN_PROGRESS":
+                        let inProgressTicketsContainer = document.getElementById("inProgressTicketsContainer");
+                        inProgressTicketsContainer.appendChild(div);
+                        break;
+                    case "DONE":
+                        let doneTicketsContainer = document.getElementById("doneTicketsContainer");
+                        doneTicketsContainer.appendChild(div);
+                        break;
+                    case "CLOSED":
+                        let closedTicketsContainer = document.getElementById("closedTicketsContainer");
+                        closedTicketsContainer.appendChild(div);
+                        break;
+                }
+            });
+        }
+
+        //handle the details button
+        let detailsButtons = document.getElementsByClassName("details-button");
+        for(let i = 0; i < detailsButtons.length; i++) {
+            let detailsButton = detailsButtons[i];
+
+            detailsButton.addEventListener("click", function () {
+                let ticketId = detailsButton.getAttribute("ticketId");
+
+                let request = new Request(`/ticket/${ticketId}/details`);
+                fetch(request)
+                    .then(response => {
+                        if(response.ok) {
+                            return response.json();
+                        }
+                    })
+                    .then(ticket => {
+                        let container = document.getElementById("detailsContainer");
+
+                        let creationDate = new Date(ticket.creationDate);
+                        let formattedCreationDate = creationDate.toLocaleString('it-CH', {
+                            hour12: false,
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        })
+                        let parts = formattedCreationDate.replaceAll(" ", "").replaceAll(".", "-").split(",");
+                        formattedCreationDate = `${parts[1]} ${parts[0]}`
+
+                        let dueDate = new Date(ticket.dueDate);
+                        let formattedDueDate = dueDate.toLocaleString('it-CH', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        })
+                        formattedDueDate = formattedDueDate.replaceAll(".", "-");
+
+                        container.innerHTML =
+                            `
+                            <div class="border-top my-3 border-2 border-black"></div>
+                            <div class="mx-2 mb-2">
+                                <span class="fs-5 fw-bold">${ticket.title}</span>
+
+                                <br>
+
+                                <span>Status:</span>
+                                <span>${ticket.status.value}</span>
+
+                                <br>
+
+                                <span>Type:</span>
+                                <span>${ticket.type.value}</span>
+
+                                <br>
+
+                                <span>Author:</span>
+                                <span>${ticket.author.username}</span>
+
+                                <br>
+
+                                <span>Creation date:</span>
+                                <span>${formattedCreationDate}</span>
+
+                                <br>
+
+                                <span>Assignee:</span>
+                                <span>${ticket.assignee.username}</span>
+
+                                <br>
+
+                                <span>Due date:</span>
+                                <span>${formattedDueDate}</span>
+
+                                <br>
+                                <span>Estimated hours:</span>
+                                <span>${ticket.resolutionEstimatedHours}</span>
+
+                                <br>
+
+                                <span>Total hours:</span>
+                                <span>${ticket.resolutionTotalHours == null ?
+                                    'still ongoing' : ticket.resolutionTotalHours}
+                                </span>
+                            </div>
+                            `
+                    })
+                    .catch(error => {
+                        console.error('Error during fetch operation: ', error);
+                    })
+            })
+        }
+
+        //handle the set total hours ticket button
+        let totalHoursButtons = document.getElementsByClassName("total-hours-button");
+        for(let i = 0; i < totalHoursButtons.length; i++) {
+            let totalHoursButton = totalHoursButtons[i];
+
+            totalHoursButton.addEventListener("click", function () {
+                totalHoursButton.style.display = "none";
+
+                let ticketId = totalHoursButton.getAttribute("ticketId");
+
+                let totalHoursContainer = totalHoursButton.closest(".total-hours-container");
+
+                let form = document.createElement("form");
+                form.setAttribute("method", "post");
+                form.setAttribute("action", `/ticket/${ticketId}/totalHours`)
+
+                form.innerHTML =
+                    `
+                    <div class="row">
+                        <label for="resolutionTotalHours" class="col-form-label col-5 text-black pe-0">
+                            Total hours:
+                        </label>
+                        <div class="col-3 px-0">
+                            <input id="resolutionTotalHours"
+                                class="form-control fw-semibold text-secondary  ps-1 pe-0"
+                                type="number" min="0.5" step="0.5" name="resolutionTotalHours" required>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-primary" type="submit">Save</button>
+                        </div>
+                    </div>
+                    `
+
+                totalHoursContainer.appendChild(form);
+            })
+        }
+    </script>
+</main>
+</body>
+</html>

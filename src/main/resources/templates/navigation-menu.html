@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Navigation Menu</title>
+    <link th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" rel="stylesheet">
+</head>
+<body>
+    <nav id="navigationMenu" class="d-flex mb-1 px-3 container-fluid
+        justify-content-start align-items-center bg-body-secondary">
+        <img th:src ="@{/images/ticket-detailed.svg}" class="me-3" width="40" height="40" alt="ticket icon">
+        <a class="px-3 rounded-3 user-select-none link-underline-opacity-0"
+           th:classappend="${menuItem == T(ch.supsi.webapp.web.model.MenuItem).HOME ?
+           'link-dark bg-primary' : 'link-primary'}"
+           th:href="@{/home}">
+            <span class="fs-4 fw-bold">Home</span>
+        </a>
+        <a class="px-3 rounded-3 user-select-none link-underline-opacity-0"
+           th:classappend="${menuItem == T(ch.supsi.webapp.web.model.MenuItem).BOARD ?
+           'link-dark bg-primary' : 'link-primary'}"
+           th:href="@{/board}">
+            <span class="fs-4 fw-bold">Board</span>
+        </a>
+        <a sec:authorize="isAuthenticated()" class="px-3 rounded-3 user-select-none link-underline-opacity-0"
+           th:classappend="${menuItem == T(ch.supsi.webapp.web.model.MenuItem).WATCHES ?
+           'link-dark bg-primary' : 'link-primary'}"
+           th:href="@{/watches}">
+            <span class="fs-4 fw-bold">Watches</span>
+        </a>
+    </nav>
+</body>
+</html>
