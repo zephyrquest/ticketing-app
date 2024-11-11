@@ -1,13 +1,10 @@
-FROM arm64v8/maven as builder
-ENTRYPOINT ["/usr/bin/mvn"]
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+FROM maven:3.9.9-amazoncorretto-17
 
-COPY pom.xml /usr/src/app
-COPY src /usr/src/app/src
-RUN mvn -T 1C install -DskipTests=true
+MAINTAINER zephyrquest
 
+COPY src /home/app/src
+COPY pom.xml /home/app
 
-FROM arm64v8/amazoncorretto:17 as runner
-COPY --from=builder /usr/src/app/target/*.jar /app.jar
-ENTRYPOINT ["java","-jar", "/app.jar"]
+RUN mvn -f /home/app/pom.xml clean package -DskipTests
+
+ENTRYPOINT ["java", "-jar", "/home/app/target/TicketingApp.jar"]
